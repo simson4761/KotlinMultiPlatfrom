@@ -1,7 +1,8 @@
-package org.example.project.network
+package com.example.shared.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.Logger
@@ -45,6 +46,12 @@ object ApiClient {
 
             install(DefaultRequest){
                 url(networkConfig.baseUrl) // base url
+            }
+
+            expectSuccess = true
+
+            HttpResponseValidator {
+
             }
         }
     }

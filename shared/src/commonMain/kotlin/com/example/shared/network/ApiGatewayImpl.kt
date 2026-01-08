@@ -1,22 +1,36 @@
-package org.example.project.network
+package com.example.shared.network
 
-import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.isSuccess
 import org.example.project.data.LoginRequest
 import org.example.project.data.LoginResponse
 
-class ApiGatewayImpl(
-    private val client: HttpClient
-) : ApiGateway {
-    override suspend fun login(request: LoginRequest): LoginResponse {
-        return client.post("/auth/login") {
-            setBody(request)
-        }.body()
+class ApiGatewayImpl : ApiGateway {
+    companion object {
+        private val client = ApiClient.createApiClient(NetworkConfig())
     }
 
-    override suspend fun logOut(request: LoginRequest): LoginResponse {
-        TODO("Not yet implemented")
+    override suspend fun login(request: LoginRequest): ApiResponse<LoginResponse> {
+        return try{
+            val response =client.post("/auth/login") {
+                setBody(request)
+            }
+
+            if (response.status.isSuccess()){
+                ApiResponse.Success(response.body())
+            }
+            else{
+                ApiResponse.Error(response.body(), responseCode = response.status.value)
+            }
+        }
+        catch(e: Exception) {
+            ApiResponse.Error(
+                message = e.message ?: "Unknown error",
+                exception = e
+            )
+        }
     }
 }
